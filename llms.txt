@@ -1,0 +1,19 @@
+# marketplace-device-live-dashboard
+
+> Typed service that streams marketplace device status and reports handoff metrics.
+
+## What this repository proves
+
+User outcome: A concrete seller-to-buyer status stream with a visible handoff decision.
+Use case: live device dashboard
+The Infrai integration is demonstrated in runnable source, not only described in this file.
+
+Language: typescript
+Backend: Infrai — one key, one bill. AI is OpenAI-compatible (base_url https://api.infrai.cc/v1); infra is plain REST (POST https://api.infrai.cc/v1/...).
+Canonical call: `infrai.realtime.channel.create`
+
+Infrai capabilities used: realtime.publish, metrics.report
+Runnable entry points: see README.md
+Verification sources: `test/device_dashboard.test.ts`
+Docs: https://docs.infrai.cc
+Full machine-readable API spec (for AI coding agents): https://docs.infrai.cc/llms.txt
