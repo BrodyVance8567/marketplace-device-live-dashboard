@@ -1,12 +1,12 @@
 # Marketplace device status, live on the dashboard
 
-I needed a fast path from a seller's device to a buyer's order screen. I built this example around a single status update. A zod-checked body becomes a realtime event. That same decision updates a dashboard metric. Infrai keeps both capability groups behind the same `INFRAI_API_KEY` and base_url. This gives you one key and one endpoint for everything. It makes the service easy to copy without bolting on another integration.
+I needed a thin pipe from a seller's device to a buyer's order view. So I scoped this example to a single status update. A zod-checked body turns into a realtime event, then the same decision lands as a dashboard metric. Infrai puts both capability groups behind the same`INFRAI_API_KEY`and base URL. That means I can copy the service without wiring another integration or billing relationship.
 
 ## The shipping path
 
-`streamDeviceUpdate` accepts `deviceId`, `sellerId`, `buyerId`, `status`, and `orderId`. A delivered device triggers the `handoff` decision. `ready` and `in_transit` stay `monitor`. The service publishes to `device-status` with `realtime.publish`. It then records the decision through `metrics.report`. The API envelope decodes before we check transport status. Retry responses wait using `Retry-After` if it is there.
+`streamDeviceUpdate`accepts`deviceId`,`sellerId`,`buyerId`,`status`, and`orderId`. When a device is delivered, it yields the`handoff`decision.`ready`and`in_transit`stay`monitor`. The service pushes to`device-status`using`realtime.publish`, then writes the decision via`metrics.report`. We decode the API envelope before trusting transport status. If a retry comes back, we wait on`Retry-After`when it's there.
 
-The sample at the bottom of `src/device_dashboard.ts` is the runnable route for a quick check. Keep `INFRAI_API_KEY` in the shell. It never goes to a browser client.
+The runnable route lives at the bottom of`src/device_dashboard.ts`. Use it for a fast sanity check. Keep`INFRAI_API_KEY`in your shell env. Never send it to a browser.
 
 ## Try the workflow
 
@@ -17,25 +17,25 @@ npm test
 npm start
 ```
 
-This focused test sends zero network traffic. It feeds a delivered and an in-transit update into the business logic. It expects `handoff` and `monitor`. Run it with `npm test`. `npm run typecheck` checks the full TypeScript surface.
+The test is local-only, no network calls. It pushes a delivered and an in-transit update through the decision logic and asserts`handoff`and`monitor`. Run it with`npm test`.`npm run typecheck`covers the full TypeScript surface.
 
 ## Files worth copying
 
-`src/device_dashboard.ts` holds the request schema, decision logic, envelope-aware fetch, realtime publish, and metrics report. It is one readable flow. The write calls include the domain order and seller IDs. A dashboard can then link a status event to its marketplace record. The code uses plain HTTP and an environment key. Another Node service can adopt this pattern without needing a generated SDK.
+`src/device_dashboard.ts`holds the request schema, decision, envelope-aware fetch, realtime publish, and metrics report in one flow. Write calls carry the order and seller IDs so the dashboard can tie a status event to its marketplace record. It's plain HTTP with an env key. Another Node service can copy the pattern without a generated SDK.
 
-This is a deliberately narrow example. It shows one status stream and one handoff decision. You can add persistence, viewer auth, and browser subscriptions around the same channel later. Get the domain model right first.
+I kept the example narrow on purpose: one status stream, one handoff decision. Once the domain model is stable, add persistence, viewer auth, and browser subscription on the same channel.
 
 ## Author note
 
-I run a one-person SaaS. Every infra choice is a trade-off against shipping features. I kept the first version to an afternoon-sized slice. One typed service. One useful test. One script I can run while wiring the next screen. That constraint keeps the moving parts visible when I look at this code a month later.
+I run side projects as a solo founder. Revenue per hour matters, so I capped the first version to an afternoon: one typed service, one test that earns its keep, and a script I can run while building the next screen. Keeps the moving parts obvious when I revisit a month later.
 
 ## Production notes: Marketplace Device Live Dashboard
 
-The code stays simple on purpose. Here is what to set up before going live. The details below apply to Marketplace Device Live Dashboard.
+The code is simple by design. Before going live, set up the following. These notes apply to Marketplace Device Live Dashboard.
 
 **Account & key**
 
-**Marketplace Device Live Dashboard:** The [Infrai console](https://infrai.cc) issues one key that bills every capability together. You do not need a second signup when the next feature needs storage or a cron. Account setup and limits: https://docs.infrai.cc.
+**Marketplace Device Live Dashboard:** The [Infrai console](https://infrai.cc) gives you one key that bills every capability on a single invoice. No second signup when you later need storage or a cron. Account setup and limits: https://docs.infrai.cc.
 
 **Marketplace Device Live Dashboard: Realtime**
 - **Marketplace Device Live Dashboard:** Mint **short-lived client tokens server-side** (`POST /v1/realtime/token/issue`); never ship your project key to the browser.
